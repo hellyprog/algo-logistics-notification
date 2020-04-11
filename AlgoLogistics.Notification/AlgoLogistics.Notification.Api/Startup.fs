@@ -11,18 +11,20 @@ open Microsoft.AspNetCore.Mvc
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
+open Microsoft.OpenApi.Models
 
 type Startup private () =
     new (configuration: IConfiguration) as this =
         Startup() then
         this.Configuration <- configuration
 
-    // This method gets called by the runtime. Use this method to add services to the container.
     member this.ConfigureServices(services: IServiceCollection) =
-        // Add framework services.
+        let info = OpenApiInfo()
+        info.Title <- "AlgoLogistics Notification API"
+        info.Version <- "v1"
+        services.AddSwaggerGen(fun config -> config.SwaggerDoc("v1", info)) |> ignore
         services.AddControllers() |> ignore
 
-    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     member this.Configure(app: IApplicationBuilder, env: IWebHostEnvironment) =
         if (env.IsDevelopment()) then
             app.UseDeveloperExceptionPage() |> ignore
@@ -31,6 +33,9 @@ type Startup private () =
         app.UseRouting() |> ignore
 
         app.UseAuthorization() |> ignore
+
+        app.UseSwagger() |> ignore
+        app.UseSwaggerUI(fun config -> config.SwaggerEndpoint("/swagger/v1/swagger.json", "AlgoLogistics Notification API")) |> ignore
 
         app.UseEndpoints(fun endpoints ->
             endpoints.MapControllers() |> ignore
