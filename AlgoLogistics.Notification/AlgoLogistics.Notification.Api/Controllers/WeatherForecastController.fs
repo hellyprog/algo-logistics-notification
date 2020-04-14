@@ -1,16 +1,12 @@
 ﻿namespace AlgoLogistics.Notification.Api.Controllers
 
 open System
-open System.Collections.Generic
-open System.Linq
-open System.Threading.Tasks
 open Microsoft.AspNetCore.Mvc
-open Microsoft.Extensions.Logging
 open AlgoLogistics.Notification.Api
 
 [<ApiController>]
 [<Route("[controller]")>]
-type WeatherForecastController (logger : ILogger<WeatherForecastController>) =
+type WeatherForecastController () =
     inherit ControllerBase()
 
     let summaries = [| "Freezing"; "Bracing"; "Chilly"; "Cool"; "Mild"; "Warm"; "Balmy"; "Hot"; "Sweltering"; "Scorching" |]
