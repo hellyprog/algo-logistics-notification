@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using AlgoLogistics.Notification.Services.Interfaces;
+using AlgoLogistics.Notification.Services.Models;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
@@ -19,14 +21,18 @@ namespace AlgoLogistics.Notification.Messages.Consumers
         private readonly string _queueName;
         private readonly string _username;
         private readonly string _password;
+        private readonly INotificationService notificationService;
 
-        public NotificationConsumer(IOptions<RabbitMqConfiguration> rabbitMqOptions)
+        public NotificationConsumer(
+            IOptions<RabbitMqConfiguration> rabbitMqOptions,
+            INotificationService notificationService)
         {
             _hostname = rabbitMqOptions.Value.Hostname;
             _queueName = rabbitMqOptions.Value.QueueName;
             _username = rabbitMqOptions.Value.UserName;
             _password = rabbitMqOptions.Value.Password;
             InitializeRabbitMqListener();
+            this.notificationService = notificationService;
         }
 
         private void InitializeRabbitMqListener()
@@ -52,8 +58,8 @@ namespace AlgoLogistics.Notification.Messages.Consumers
             consumer.Received += (ch, ea) =>
             {
                 var content = Encoding.UTF8.GetString(ea.Body.ToArray());
-
-                HandleMessage(content);
+                var notification = JsonConvert.DeserializeObject<EmailNotification>(content);
+                notificationService.SendEmailNotification(notification);
 
                 _channel.BasicAck(ea.DeliveryTag, false);
             };
@@ -65,11 +71,6 @@ namespace AlgoLogistics.Notification.Messages.Consumers
             _channel.BasicConsume(_queueName, false, consumer);
 
             return Task.CompletedTask;
-        }
-
-        private void HandleMessage(string notification)
-        {
-            Console.WriteLine(notification);
         }
 
         private void OnConsumerConsumerCancelled(object sender, ConsumerEventArgs e)

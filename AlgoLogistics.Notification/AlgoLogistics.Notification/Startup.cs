@@ -1,5 +1,7 @@
 using AlgoLogistics.Notification.Messages;
 using AlgoLogistics.Notification.Messages.Consumers;
+using AlgoLogistics.Notification.Services;
+using AlgoLogistics.Notification.Services.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -22,6 +24,7 @@ namespace AlgoLogistics.Notification
 			services.AddControllers();
 			services.AddOptions();
 			services.Configure<RabbitMqConfiguration>(Configuration.GetSection("RabbitMq"));
+			services.AddTransient<INotificationService, NotificationService>();
 			services.AddHostedService<NotificationConsumer>();
 		}
 
